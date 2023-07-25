@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.15.0
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.15.0
+    depends_on:
+      - elasticsearch
+    ports:
+      - 9600:9600
+    volumes:
+      - ./logstash/config:/config-dir
+      - ./logs:/logs
+    command: logstash -f /config-dir/logstash.conf
+
+volumes:
+  esdata:
+    driver: local
